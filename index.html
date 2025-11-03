@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerHub - Professional Career Development Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1><i class="fas fa-briefcase"></i> CareerHub</h1>
+            <p class="subtitle">Your Professional Career Development Platform</p>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-messages">
+                        {% for category, message in messages %}
+                            <div class="flash-message flash-{{ category }}">
+                                <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}"></i>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+  <!-- CV ANALYZER SECTION -->
+            <section class="feature-section">
+                <div class="section-header">
+                    <i class="fas fa-file-alt"></i>
+                    <h2>CV Analysis & Improvement</h2>
+                    <p>Paste your CV and the job description for tailored improvements. You may also upload your CV (PDF or Word).</p>
+                </div>
+                
+                <form action="/analyze" method="post" class="form-container" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="cv_text">Paste your CV content below:</label>
+                        <div class="cv-input-wrapper">
+                            <textarea 
+                                name="cv_text" 
+                                id="cv_text" 
+                                rows="12" 
+                                placeholder="Enter your CV content here... Include contact information, education, work experience, and skills."
+                                required
+                            ></textarea>
+
+                            <!-- Hidden file input used by the floating upload button -->
+                            <input type="file" id="cv_file" name="cv_file" class="hidden-file" style="display:none" />
+
+                            <!-- Floating Upload Button (bottom-left) -->
+                            <div class="fab-upload" aria-label="Upload CV">
+                                <button type="button" class="fab-main" title="Upload">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <div class="fab-menu">
+                                    <button type="button" class="fab-item" data-type="pdf" title="Upload PDF">
+                                        <i class="fas fa-file-pdf"></i><span>PDF</span>
+                                    </button>
+                                    <button type="button" class="fab-item" data-type="docx" title="Upload Word (.docx)">
+                                        <i class="fas fa-file-word"></i><span>Word</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Selected filename badge -->
+                            <div class="file-badge" id="cv_file_badge" style="display:none">
+                                <span class="file-name" id="cv_file_name"></span>
+                                <button type="button" class="file-remove" id="cv_file_remove" aria-label="Remove file">&times;</button>
+                            </div>
+                        </div>
+                        <small class="text-muted">Tip: You can upload a file with the + button or paste/edit your CV here.</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="job_description">Paste the Job Description (JD):</label>
+                        <textarea
+                            name="job_description"
+                            id="job_description"
+                            rows="8"
+                            placeholder="Paste the job description here. The analysis will be tailored to match your CV to this JD."
+                        ></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Analyze My CV
+                    </button>
+    </form>
+
+    {% if output %}
+                    <div class="result-container">
+                        {{ output | safe }}
+      </div>
+    {% endif %}
+  </section>
+
+            <!-- PERSONAL STATEMENT GENERATOR -->
+            <section class="feature-section">
+                <div class="section-header">
+                    <i class="fas fa-edit"></i>
+                    <h2>Personal Statement Generator</h2>
+                    <p>Create compelling personal statements tailored to your career goals</p>
+                </div>
+                
+                <form action="/statement" method="post" class="form-container">
+                    <div class="form-group">
+                        <label for="goal_text">Describe your career goal:</label>
+                        <input 
+                            type="text" 
+                            name="goal_text" 
+                            id="goal_text" 
+                            placeholder="e.g., I am applying for a Software Engineering Apprenticeship at Google"
+                            required
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-magic"></i> Generate Statement
+                    </button>
+    </form>
+
+    {% if statement_output %}
+                    <div class="result-container">
+                        {{ statement_output | safe }}
+                    </div>
+                {% endif %}
+            </section>
+
+            <!-- SKILLS ASSESSMENT -->
+            <section class="feature-section">
+                <div class="section-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h2>Skills Assessment</h2>
+                    <p>Evaluate your current skills and get personalized learning recommendations</p>
+                </div>
+                
+                <form action="/skills" method="post" class="form-container">
+                    <div class="form-group">
+                        <label>Select your current skills:</label>
+                        <div class="skills-grid">
+                            {% for category, skills in tech_skills.items() %}
+                                <div class="skill-category">
+                                    <h4>{{ category.replace('_', ' ').title() }}</h4>
+                                    {% for skill in skills %}
+                                        <label class="skill-checkbox">
+                                            <input type="checkbox" name="skills" value="{{ skill }}">
+                                            <span>{{ skill }}</span>
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-clipboard-check"></i> Assess My Skills
+                    </button>
+                </form>
+
+                {% if skills_output %}
+                    <div class="result-container">
+                        {{ skills_output | safe }}
+      </div>
+    {% endif %}
+  </section>
+
+            <!-- JOB MATCHING -->
+            <section class="feature-section">
+                <div class="section-header">
+                    <i class="fas fa-search"></i>
+                    <h2>Job Matching</h2>
+                    <p>Find job opportunities that match your skills and interests</p>
+                </div>
+                
+                <form action="/match" method="post" class="form-container">
+                    <div class="form-group">
+                        <label for="user_skills">Enter your skills (comma-separated):</label>
+                        <input 
+                            type="text" 
+                            name="user_skills" 
+                            id="user_skills" 
+                            placeholder="e.g., Python, JavaScript, React, Git, MySQL"
+                            required
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-briefcase"></i> Find Matching Jobs
+                    </button>
+                </form>
+
+                {% if match_output %}
+                    <div class="result-container">
+                        {{ match_output | safe }}
+                    </div>
+                {% endif %}
+            </section>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 CareerHub. Professional Career Development Platform.</p>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
